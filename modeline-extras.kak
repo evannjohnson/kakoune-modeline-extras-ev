@@ -71,6 +71,7 @@ provide-module modeline-extras %{
   -docstring 'Enable Git branch option for mode line' %{
     declare-option str modeline_git_branch
     hook -group modeline-git-branch global WinDisplay .* modeline-git-branch-update
+    hook -group modeline-git-branch global FocusIn .* modeline-git-branch-update
   }
   # disable
   define-command modeline-git-branch-disable \
@@ -82,7 +83,7 @@ provide-module modeline-extras %{
   define-command -hidden modeline-git-branch-update %{
     set-option buffer modeline_git_branch %sh{
       symbol=''
-      $kak_opt_nerdfont && symbol=' '
+      # $kak_opt_nerdfont && symbol=' '
       branch=$(cd "${kak_buffile%/*}" 2>/dev/null && git symbolic-ref --short HEAD 2>/dev/null)
       [ $branch ] && printf '%s' "$symbol" "$branch"
     }
