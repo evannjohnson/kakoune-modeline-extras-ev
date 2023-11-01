@@ -70,6 +70,8 @@ provide-module modeline-extras %{
   define-command modeline-git-branch-enable \
   -docstring 'Enable Git branch option for mode line' %{
     declare-option str modeline_git_branch
+    declare-option str modeline_git_dirty
+    declare-option str modeline_git_staged
     hook -group modeline-git-branch global WinDisplay .* modeline-git-branch-update
     hook -group modeline-git-branch global FocusIn .* modeline-git-branch-update
   }
@@ -81,11 +83,39 @@ provide-module modeline-extras %{
   }
   # update
   define-command -hidden modeline-git-branch-update %{
-    set-option buffer modeline_git_branch %sh{
+    nop %sh{
       symbol=''
-      # $kak_opt_nerdfont && symbol=' '
-      branch=$(cd "${kak_buffile%/*}" 2>/dev/null && git symbolic-ref --short HEAD 2>/dev/null)
-      [ $branch ] && printf '%s' "$symbol" "$branch"
+      branch=$(cd "${kak_buffile%/*}" && git symbolic-ref --short HEAD)
+      if [ -n "$branch" ]; then
+        echo "set-option buffer modeline_git_branch $branch" > $kak_command_fifo
+        git diff --exit-code --quiet $kak_buffile || echo "set-option buffer modeline_git_dirty '•'" > $kak_command_fifo
+        git diff --cached --exit-code --quiet $kak_buffile || echo "set-option buffer modeline_git_staged '+'" > $kak_command_fifo
+      fi
+    }
+  }
+
+  # Better path
+  # enable
+  define-command modeline-path-name-enable \
+  -docstring 'Enable path and name option for mode line' %{
+    declare-option str modeline_file_path
+    declare-option str modeline_file_name
+    hook -group modeline-path-name global WinDisplay .* modeline-path-name-update
+    hook -group modeline-path-name global FocusIn .* modeline-path-name-update
+    hook -group modeline-path-name global BufWritePost .* modeline-path-name-update
+  }
+  # disable
+  define-command modeline-path-name-disable \
+  -docstring 'Disable Git branch option for mode line' %{
+    set-option current modeline_file_path ''
+    set-option current modeline_file_name ''
+    remove-hooks global modeline-path-name
+  }
+  # update
+  define-command -hidden modeline-path-name-update %{
+    set-option buffer modeline_file_path %sh{
+    # to change how many characters are displayed in the shortened path for each folder, modify the .{0,x} part of the regex, where x is 1 less than the number of characters to display
+    printf "${kak_buffile%/*}" | perl -pe 's|^$ENV{HOME}|~|'| perl -F/ -lane 'for (@F) { if (length($_) > 5) { $_ = substr($_, 0, 5) . ""; } } print join("/", @F) . "/"'
     }
   }
 
