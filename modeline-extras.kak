@@ -88,13 +88,21 @@ provide-module modeline-extras %{
       branch=$(cd "${kak_buffile%/*}" && git symbolic-ref --short HEAD)
       if [ -n "$branch" ]; then
         echo "set-option buffer modeline_git_branch $branch" > $kak_command_fifo
-        git diff --exit-code --quiet $kak_buffile || echo "set-option buffer modeline_git_dirty '•'" > $kak_command_fifo
-        git diff --cached --exit-code --quiet $kak_buffile || echo "set-option buffer modeline_git_staged '+'" > $kak_command_fifo
+        if git diff --exit-code --quiet $kak_buffile ; then
+            echo "set-option buffer modeline_git_dirty ''" > $kak_command_fifo
+        else
+            echo "set-option buffer modeline_git_dirty '•'" > $kak_command_fifo
+        fi
+        if git diff --cached --exit-code --quiet $kak_buffile ; then
+            echo "set-option buffer modeline_git_staged ''" > $kak_command_fifo
+        else
+            echo "set-option buffer modeline_git_staged '+'" > $kak_command_fifo
+        fi
       fi
     }
   }
 
-  # Better path
+  # Better pathh
   # enable
   define-command modeline-path-name-enable \
   -docstring 'Enable path and name option for mode line' %{
