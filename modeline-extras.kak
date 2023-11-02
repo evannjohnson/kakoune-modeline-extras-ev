@@ -125,6 +125,9 @@ provide-module modeline-extras %{
     # to change how many characters are displayed in the shortened path for each folder, modify the .{0,x} part of the regex, where x is 1 less than the number of characters to display
     printf "${kak_buffile%/*}" | perl -pe 's|^$ENV{HOME}|~|'| perl -F/ -lane 'for (@F) { if (length($_) > 5) { $_ = substr($_, 0, 5) . ""; } } print join("/", @F) . "/"'
     }
+    set-option buffer modeline_file_name %sh{
+    printf "${kak_buffile##*/}"
+    }
   }
 
   # Indentwidth
