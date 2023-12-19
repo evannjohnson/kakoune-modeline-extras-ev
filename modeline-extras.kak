@@ -85,8 +85,8 @@ provide-module modeline-extras %{
   define-command -hidden modeline-git-branch-update %{
     nop %sh{
       symbol=''
-      cd "${kak_buffile%/*}"
-      branch=$(git symbolic-ref --short HEAD)
+      cd "${kak_buffile%/*}" 2>/dev/null
+      branch=$(git symbolic-ref --short HEAD 2>/dev/null)
       if [ -n "$branch" ]; then
         echo "set-option buffer modeline_git_branch $branch" > $kak_command_fifo
         if git diff --exit-code --quiet $kak_buffile ; then
