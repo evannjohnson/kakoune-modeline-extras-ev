@@ -73,6 +73,8 @@ provide-module modeline-extras %{
     declare-option str modeline_git_dirty
     declare-option str modeline_git_staged
     hook -group modeline-git-branch global WinDisplay .* modeline-git-branch-update
+    hook -group modeline-git-branch global BufWritePost .* modeline-git-branch-update
+    hook -group modeline-git-branch global BufReload .* modeline-git-branch-update
     hook -group modeline-git-branch global FocusIn .* modeline-git-branch-update
   }
   # disable
